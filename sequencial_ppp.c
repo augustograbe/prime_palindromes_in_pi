@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 int BUFFER_SIZE = 1000000;
-int palindrome_size = 21;
+int palindrome_size = 9;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -37,13 +37,14 @@ int is_prime( char str[] ){
 
 int search_prime_palindrome( char str[] ){
     char digits[palindrome_size+2];
-
+    memset(digits, '\0', sizeof(digits));
+    
     for( int i = 0 ; i <= BUFFER_SIZE ; i++ ){
         strncpy( digits, str+i, palindrome_size );
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
                 printf("%s ", digits);
-                return i+1;
+                return i+1; // retorna a posição do palindromo + 1
             }
         }
     }
@@ -58,8 +59,7 @@ int main(int argc, char*argv[]){
     int pos;
 
     if (argc < 2){
-      //fprintf(stderr, "Digite: %s <arquivo entrada> <tamanho do palindromo>\n", argv[0]);
-      fprintf(stderr, "Digite: %s <arquivo entrada>\n", argv[0]);
+      fprintf(stderr, "Digite: %s <arquivos entrada>\n", argv[0]);
       return 1;
     }
 
@@ -67,11 +67,13 @@ int main(int argc, char*argv[]){
 
     source = fopen(argv[1], "rb");
 
+    printf("tamanho %d\n", palindrome_size);
+
     if (source)
     {
         while (!feof(source))
         {
-            fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR );
+            fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
             n = fread(buffer, 1, BUFFER_SIZE, source);
             
             pos = search_prime_palindrome(buffer);
