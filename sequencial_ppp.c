@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 int BUFFER_SIZE = 1000000;
-int palindrome_size = 9;
+int palindrome_size = 17;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -38,7 +38,7 @@ int is_prime( char str[] ){
 int search_prime_palindrome( char str[] ){
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
-    
+
     for( int i = 0 ; i <= BUFFER_SIZE ; i++ ){
         strncpy( digits, str+i, palindrome_size );
         if ( is_odd_palindrome(digits) ){
@@ -55,38 +55,56 @@ int search_prime_palindrome( char str[] ){
 int main(int argc, char*argv[]){
     FILE *source;
     int n;
-    unsigned long long count = 0;
-    int pos;
+    unsigned long long count = 0; //quantidade de elementos lidos
+    int pos; //posição do palindromo achado no buffer
 
     if (argc < 2){
-      fprintf(stderr, "Digite: %s <arquivos entrada>\n", argv[0]);
+      fprintf(stderr, "Digite: %s <arquivos entrada em ordem>\n", argv[0]);
       return 1;
     }
 
     unsigned char buffer[BUFFER_SIZE];
+    unsigned char prior_digits[palindrome_size+1];
+    memset(prior_digits, '\0', sizeof(prior_digits));
+    
+    for ( int i = 1 ; i < argc ; i++ ){
 
-    source = fopen(argv[1], "rb");
+        source = fopen(argv[i], "rb");
 
-    printf("tamanho %d\n", palindrome_size);
-
-    if (source)
-    {
-        while (!feof(source))
+        if (source)
         {
-            fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
-            n = fread(buffer, 1, BUFFER_SIZE, source);
-            
+            //I primeiro loop inserindo os digitos salvos do ultimo arquivo
+            n = fread( buffer, 1, BUFFER_SIZE - palindrome_size - 1, source );
+            strcpy( buffer , prior_digits);
             pos = search_prime_palindrome(buffer);
             if ( pos ){
-                printf("Posicao %d", count + pos - 1);
-                break;
+                    printf("Posicao %d", count + pos - 1);
+                    break;
             }
             count += n;
             printf(".");
+            memset(prior_digits, '\0', sizeof(prior_digits));
+
+            while (!feof(source))
+            {
+                fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
+                n = fread( buffer, 1, BUFFER_SIZE, source );
+                pos = search_prime_palindrome(buffer);
+                if ( pos ){
+                    printf("Posicao %d", count + pos - 1);
+                    break;
+                }
+                count += n;
+                printf(".");
+            }
+
+            //guarda os ultimos digitos para o buffer do proximo arquivo
+            fseek( source, (palindrome_size - 1) * (-1), SEEK_END );
+            fread( prior_digits, 1, palindrome_size - 1, source );
         }
-        
+
+        fclose(source);
     }
 
-    fclose(source);
     return 0;
 }
