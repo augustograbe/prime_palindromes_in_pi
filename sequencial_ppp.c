@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 int BUFFER_SIZE = 1000000;
-int palindrome_size = 17;
+int palindrome_size = 15;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -35,11 +35,11 @@ int is_prime( char str[] ){
     return 1;
 }
 
-int search_prime_palindrome( char str[] ){
+int search_prime_palindrome( char str[], int n ){
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
 
-    for( int i = 0 ; i <= BUFFER_SIZE ; i++ ){
+    for( int i = 0 ; i <= n ; i++ ){
         strncpy( digits, str+i, palindrome_size );
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
@@ -76,7 +76,7 @@ int main(int argc, char*argv[]){
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
             n = fread( buffer, 1, BUFFER_SIZE - palindrome_size - 1, source );
             strcpy( buffer , prior_digits);
-            pos = search_prime_palindrome(buffer);
+            pos = search_prime_palindrome( buffer, n );
             if ( pos ){
                     printf("Posicao %d", count + pos - 1);
                     break;
@@ -89,7 +89,7 @@ int main(int argc, char*argv[]){
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
                 n = fread( buffer, 1, BUFFER_SIZE, source );
-                pos = search_prime_palindrome(buffer);
+                pos = search_prime_palindrome( buffer, n );
                 if ( pos ){
                     printf("Posicao %d", count + pos - 1);
                     break;
