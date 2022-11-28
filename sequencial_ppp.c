@@ -21,7 +21,7 @@
 */
 
 int BUFFER_SIZE = 1000000;
-int palindrome_size = 23;
+int palindrome_size = 19;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -97,10 +97,10 @@ int main(int argc, char*argv[]){
             strcpy( buffer , prior_digits);
             pos = search_prime_palindrome( buffer, n );
             if ( pos ){
-                    printf("Posicao %d", count + pos - 1);
-                    break;
+                    printf("Posicao %d\n", count + pos - 1);
+                    goto end_program;
             }
-            count += n;
+            count += n - strlen(prior_digits);
             printf(".");
             memset(prior_digits, '\0', sizeof(prior_digits));
 
@@ -111,9 +111,9 @@ int main(int argc, char*argv[]){
                 pos = search_prime_palindrome( buffer, n );
                 if ( pos ){
                     printf("Posicao: %d\n", count + pos - 1);
-                    break;
+                    goto end_program;
                 }
-                count += n;
+                count += n - palindrome_size + 1;
                 printf(".");
             }
 
@@ -123,9 +123,10 @@ int main(int argc, char*argv[]){
         }
 
         fclose(source);
-        //GET_TIME(tempo_2);
-        //printf("Tempo: %e segundos\n", tempo_2-tempo_1);
     }
+    end_program:
+    //GET_TIME(tempo_2);
+    //printf("Tempo: %e segundos\n", tempo_2-tempo_1);
 
     return 0;
 }
