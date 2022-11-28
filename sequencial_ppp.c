@@ -21,7 +21,7 @@
 */
 
 int BUFFER_SIZE = 1000000;
-int palindrome_size = 19;
+int palindrome_size = 15;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -93,7 +93,7 @@ int main(int argc, char*argv[]){
         if (source)
         {
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
-            n = fread( buffer, 1, BUFFER_SIZE - palindrome_size - 1, source );
+            n = fread( buffer, 1, BUFFER_SIZE - palindrome_size + 1, source );
             strcpy( buffer , prior_digits);
             pos = search_prime_palindrome( buffer, n );
             if ( pos ){
@@ -110,10 +110,11 @@ int main(int argc, char*argv[]){
                 n = fread( buffer, 1, BUFFER_SIZE, source );
                 pos = search_prime_palindrome( buffer, n );
                 if ( pos ){
-                    printf("Posicao: %d\n", count + pos - 1);
+                    printf("Posicao: %d\n", count + pos - 1 - palindrome_size + 1);
                     goto end_program;
                 }
                 count += n - palindrome_size + 1;
+                printf("%d",count);
                 printf(".");
             }
 
