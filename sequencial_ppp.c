@@ -3,9 +3,25 @@
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
+#include <time.h>
+
+/*
+#ifndef _CLOCK_TIMER_H
+#define _CLOCK_TIMER_H
+
+#include <sys/time.h>
+#define BILLION 1000000000L
+
+#define GET_TIME(now) { \
+   struct timespec time; \
+   clock_gettime(CLOCK_MONOTONIC, &time); \
+   now = time.tv_sec + time.tv_nsec/1000000000.0; \
+}
+#endif
+*/
 
 int BUFFER_SIZE = 1000000;
-int palindrome_size = 15;
+int palindrome_size = 23;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -43,7 +59,7 @@ int search_prime_palindrome( char str[], int n ){
         strncpy( digits, str+i, palindrome_size );
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
-                printf("%s ", digits);
+                printf("\nEncontrado: %s\n", digits);
                 return i+1; // retorna a posição do palindromo + 1
             }
         }
@@ -54,10 +70,13 @@ int search_prime_palindrome( char str[], int n ){
 
 int main(int argc, char*argv[]){
     FILE *source;
-    int n;
+    int n; //quantidade de elementos lidos
     unsigned long long count = 0; //quantidade de elementos lidos
     int pos; //posição do palindromo achado no buffer
 
+    //double tempo_1, tempo_2; //variáveis para medida de tempo
+
+    //GET_TIME(tempo_1);
     if (argc < 2){
       fprintf(stderr, "Digite: %s <arquivos entrada em ordem>\n", argv[0]);
       return 1;
@@ -91,7 +110,7 @@ int main(int argc, char*argv[]){
                 n = fread( buffer, 1, BUFFER_SIZE, source );
                 pos = search_prime_palindrome( buffer, n );
                 if ( pos ){
-                    printf("Posicao %d", count + pos - 1);
+                    printf("Posicao: %d\n", count + pos - 1);
                     break;
                 }
                 count += n;
@@ -104,6 +123,8 @@ int main(int argc, char*argv[]){
         }
 
         fclose(source);
+        //GET_TIME(tempo_2);
+        //printf("Tempo: %e segundos\n", tempo_2-tempo_1);
     }
 
     return 0;
