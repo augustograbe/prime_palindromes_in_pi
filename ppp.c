@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 #define NTHREADS 4
-#define BUFFER_SIZE 500000
+#define BUFFER_SIZE 100000
 
 /*
 #ifndef _CLOCK_TIMER_H
@@ -25,7 +25,7 @@
 */
 
 int buffer_size = BUFFER_SIZE;
-int palindrome_size = 15;
+int palindrome_size = 19;
 int n_threads = NTHREADS;
 
 typedef struct s_param {
@@ -61,13 +61,13 @@ int is_prime( char str[] ){
     return 1;
 }
 
-int search_prime_palindrome( char str[], int n ){
+int search_prime_palindrome( s_param param ){
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
     //printf("%s\n", str);
 
-    for( int i = 0 ; i <= n - palindrome_size; i++ ){
-        strncpy( digits, str+i, palindrome_size );
+    for( int i = 0 ; i <= param.size - palindrome_size; i++ ){
+        strncpy( digits, param.buffer+i, palindrome_size );
         //printf("%s ",digits);
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
@@ -119,7 +119,7 @@ int main(int argc, char*argv[]){
             strcpy( t_param[t].buffer , prior_digits);
 
 
-            pos = search_prime_palindrome( t_param[t].buffer, t_param[t].size  );
+            pos = search_prime_palindrome( t_param[t] );
             if ( pos ){
                     printf("Posicao %llu\n", count + pos - 1);
                     goto end_program;
@@ -133,7 +133,7 @@ int main(int argc, char*argv[]){
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
                 t_param[t].size  = fread( t_param[t].buffer, 1, buffer_size, source );
-                pos = search_prime_palindrome( t_param[t].buffer, t_param[t].size  );
+                pos = search_prime_palindrome( t_param[t] );
                 if ( pos ){
                     printf("Posicao: %llu\n", count + pos - 1 - palindrome_size + 1);
                     goto end_program;
