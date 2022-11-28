@@ -20,8 +20,8 @@
 #endif
 */
 
-int BUFFER_SIZE = 1000000;
-int palindrome_size = 15;
+int BUFFER_SIZE = 15;
+int palindrome_size = 5;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -54,9 +54,10 @@ int is_prime( char str[] ){
 int search_prime_palindrome( char str[], int n ){
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
-
-    for( int i = 0 ; i <= n ; i++ ){
+    //printf("%s\n ",str);
+    for( int i = 0 ; i <= n - palindrome_size; i++ ){
         strncpy( digits, str+i, palindrome_size );
+        //printf("%s ",digits);
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
                 printf("\nEncontrado: %s\n", digits);
@@ -83,6 +84,7 @@ int main(int argc, char*argv[]){
     }
 
     unsigned char buffer[BUFFER_SIZE];
+    memset(buffer, '\0', sizeof(buffer));
     unsigned char prior_digits[palindrome_size+1];
     memset(prior_digits, '\0', sizeof(prior_digits));
     
@@ -97,7 +99,7 @@ int main(int argc, char*argv[]){
             strcpy( buffer , prior_digits);
             pos = search_prime_palindrome( buffer, n );
             if ( pos ){
-                    printf("Posicao %d\n", count + pos - 1);
+                    printf("Posicao %llu\n", count + pos - 1);
                     goto end_program;
             }
             count += n - strlen(prior_digits);
@@ -110,11 +112,12 @@ int main(int argc, char*argv[]){
                 n = fread( buffer, 1, BUFFER_SIZE, source );
                 pos = search_prime_palindrome( buffer, n );
                 if ( pos ){
-                    printf("Posicao: %d\n", count + pos - 1 - palindrome_size + 1);
+                    printf("Posicao: %llu\n", count + pos - 1 - palindrome_size + 1);
                     goto end_program;
                 }
                 count += n - palindrome_size + 1;
-                printf("%d",count);
+                //printf("%d",count);
+                //sleep(1);
                 printf(".");
             }
 
