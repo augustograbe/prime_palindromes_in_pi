@@ -96,7 +96,7 @@ int main(int argc, char*argv[]){
         memset(t_param[i].buffer, '\0', sizeof(t_param[i].buffer));
         t_param[i].size = 0;
     }
-    int t = 1; // thread 
+    int t = 0; // thread 
 
     //GET_TIME(tempo_1);
     if (argc < 2){
@@ -117,9 +117,11 @@ int main(int argc, char*argv[]){
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
             t_param[t].size = fread( t_param[t].buffer , 1, buffer_size - palindrome_size + 1, source );
             strcpy( t_param[t].buffer , prior_digits);
-
-
             pos = search_prime_palindrome( t_param[t] );
+
+            t++;
+            if( t == n_threads ) t=0;
+
             if ( pos ){
                     printf("Posicao %llu\n", count + pos - 1);
                     goto end_program;
@@ -129,11 +131,16 @@ int main(int argc, char*argv[]){
             //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
             memset(prior_digits, '\0', sizeof(prior_digits));
 
+
             while (!feof(source))
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
                 t_param[t].size  = fread( t_param[t].buffer, 1, buffer_size, source );
                 pos = search_prime_palindrome( t_param[t] );
+
+                t++;
+                if( t == n_threads ) t=0;
+                
                 if ( pos ){
                     printf("Posicao: %llu\n", count + pos - 1 - palindrome_size + 1);
                     goto end_program;
