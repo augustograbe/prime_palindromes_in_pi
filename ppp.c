@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 #define NTHREADS 4
-#define BUFFER_SIZE 100000
+#define BUFFER_SIZE 100
 
 /*
 #ifndef _CLOCK_TIMER_H
@@ -121,7 +121,7 @@ int main(int argc, char*argv[]){
             t_param[t].size = fread( t_param[t].buffer , 1, buffer_size - palindrome_size + 1, source );
             strcpy( t_param[t].buffer , prior_digits);
             //pos = search_prime_palindrome( t_param[t] );
-            if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param[t]) ){
+            if( pthread_create(tid+t , NULL, search_prime_palindrome, &t_param[t]) ){
               fprintf(stderr, "ERRO--pthread_create\n");
               return 3;
             }
@@ -156,7 +156,7 @@ int main(int argc, char*argv[]){
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
                 t_param[t].size  = fread( t_param[t].buffer, 1, buffer_size, source );
                 //pos = search_prime_palindrome( t_param[t] );
-                if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param[t]) ){
+                if( pthread_create(tid+t , NULL, search_prime_palindrome, &t_param[t]) ){
                   fprintf(stderr, "ERRO--pthread_create\n");
                   return 3;
                 }
@@ -174,8 +174,9 @@ int main(int argc, char*argv[]){
                       goto end_program;
                     }
                   }
+                  t=0;
                 }
-                t=0;
+               
 
                 count += t_param[t].size  - palindrome_size + 1;
                 //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
