@@ -61,32 +61,35 @@ int is_prime( char str[] ){
     return 1;
 }
 
-int search_prime_palindrome( s_param param ){
+void * search_prime_palindrome( void * arg ){
+    s_param *param  = (s_param*) arg;
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
     //printf("%s\n", str);
 
-    for( int i = 0 ; i <= param.size - palindrome_size; i++ ){
-        strncpy( digits, param.buffer+i, palindrome_size );
+    for( int i = 0 ; i <= (*param).size - palindrome_size; i++ ){
+        strncpy( digits, (*param).buffer+i, palindrome_size );
         //printf("%s ",digits);
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
                 printf("\nEncontrado: %s\n", digits);
-                return i+1; // retorna a posição do palindromo + 1
-                //pthread_exit((void *) i+1); 
+                //return i+1; // retorna a posição do palindromo + 1
+                pthread_exit((void *) i+1); 
             }
         }
     }
 
-    //pthread_exit(NULL);
-    return 0;
+    pthread_exit(NULL);
+    //return 0;
 }
 
 int main(int argc, char*argv[]){
     FILE *source;
     //int n; //quantidade de elementos lidos
     unsigned long long count = 0; //quantidade de elementos lidos
-    int pos; //posição do palindromo achado no buffer
+    //int pos; //posição do palindromo achado no buffer
+    int retorno;
+    pthread_t *tid; //identificadores das threads no sistema
 
     //double tempo_1, tempo_2; //variáveis para medida de tempo
 
@@ -117,15 +120,31 @@ int main(int argc, char*argv[]){
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
             t_param[t].size = fread( t_param[t].buffer , 1, buffer_size - palindrome_size + 1, source );
             strcpy( t_param[t].buffer , prior_digits);
-            pos = search_prime_palindrome( t_param[t] );
+            //pos = search_prime_palindrome( t_param[t] );
+            if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param[t]) ){
+              fprintf(stderr, "ERRO--pthread_create\n");
+              return 3;
+            }
 
             t++;
-            if( t == n_threads ) t=0;
+            if( t == n_threads ){
+              for(int j=0; j<n_threads; j++) {
+                if(pthread_join(*(tid+j), (void**) &retorno)){
+                  fprintf(stderr, "ERRO--pthread_create\n");
+                  return 3;
+                }
 
-            if ( pos ){
-                    printf("Posicao %llu\n", count + pos - 1);
-                    goto end_program;
-            }
+                if ( retorno ){
+                  printf("Posicao %llu\n", count + retorno - 1);
+                  goto end_program;
+                }
+              }
+              t=0;
+            } 
+
+
+
+            
             count += t_param[t].size - strlen(prior_digits);
             printf(".");
             //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
@@ -136,15 +155,28 @@ int main(int argc, char*argv[]){
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
                 t_param[t].size  = fread( t_param[t].buffer, 1, buffer_size, source );
-                pos = search_prime_palindrome( t_param[t] );
+                //pos = search_prime_palindrome( t_param[t] );
+                if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param[t]) ){
+                  fprintf(stderr, "ERRO--pthread_create\n");
+                  return 3;
+                }
 
                 t++;
-                if( t == n_threads ) t=0;
-                
-                if ( pos ){
-                    printf("Posicao: %llu\n", count + pos - 1 - palindrome_size + 1);
-                    goto end_program;
+                if( t == n_threads ){
+                  for(int j=0; j<n_threads; j++) {
+                    if(pthread_join(*(tid+j), (void**) &retorno)){
+                      fprintf(stderr, "ERRO--pthread_create\n");
+                      return 3;
+                    }
+
+                    if ( retorno ){
+                      printf("Posicao: %llu\n", count + retorno - 1 - palindrome_size + 1);
+                      goto end_program;
+                    }
+                  }
                 }
+                t=0;
+
                 count += t_param[t].size  - palindrome_size + 1;
                 //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
                 //sleep(1);
