@@ -66,6 +66,7 @@ void * search_prime_palindrome( void * arg ){
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
     //printf("%s\n", (*param).buffer);
+    
 
     for( int i = 0 ; i <= (*param).size - palindrome_size; i++ ){
         strncpy( digits, (*param).buffer+i, palindrome_size );
@@ -114,7 +115,7 @@ int main(int argc, char*argv[]){
 
     tid = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
     if(tid==NULL) {
-        fprintf(stderr, "ERRO--malloc\n");
+        fprintf(stderr, "ERRO--malloc tid\n");
         return 2;
     }
 
@@ -126,6 +127,10 @@ int main(int argc, char*argv[]){
         {
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
             t_param = malloc(sizeof(s_param));
+            if(t_param==NULL) {
+              fprintf(stderr, "ERRO--malloc PARAM\n");
+              return 2;
+            }
             (*t_param).size = fread( (*t_param).buffer , 1, buffer_size - palindrome_size + 1, source );
             strcpy( (*t_param).buffer , prior_digits);
 
@@ -161,6 +166,11 @@ int main(int argc, char*argv[]){
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
                 t_param = malloc(sizeof(s_param));
+                if(t_param==NULL) {
+                  fprintf(stderr, "ERRO--malloc PARAM\n");
+                  return 2;
+                }
+
                 (*t_param).size  = fread( (*t_param).buffer, 1, buffer_size, source );
                 //pos = search_prime_palindrome( t_param[t] );
                 if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param) ){
@@ -188,7 +198,7 @@ int main(int argc, char*argv[]){
                 count += (*t_param).size  - palindrome_size + 1;
                 //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
                 //sleep(1);
-                printf(".");
+                //printf(".");
             }
 
             //guarda os ultimos digitos para o buffer do proximo arquivo
