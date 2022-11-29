@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 #define NTHREADS 4
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 100000
 
 /*
 #ifndef _CLOCK_TIMER_H
@@ -65,7 +65,7 @@ void * search_prime_palindrome( void * arg ){
     s_param *param  = (s_param*) arg;
     char digits[palindrome_size+2];
     memset(digits, '\0', sizeof(digits));
-    //printf("%s\n", str);
+    //printf("%s\n", (*param).buffer);
 
     for( int i = 0 ; i <= (*param).size - palindrome_size; i++ ){
         strncpy( digits, (*param).buffer+i, palindrome_size );
@@ -79,6 +79,7 @@ void * search_prime_palindrome( void * arg ){
         }
     }
 
+    free (arg);
     pthread_exit(NULL);
     //return 0;
 }
@@ -93,12 +94,12 @@ int main(int argc, char*argv[]){
 
     //double tempo_1, tempo_2; //variáveis para medida de tempo
 
-    s_param t_param[n_threads];
+    s_param * t_param;
     
-    for( int i=0; i<n_threads; i++) { // inicializa a struct de cada thread
-        memset(t_param[i].buffer, '\0', sizeof(t_param[i].buffer));
-        t_param[i].size = 0;
-    }
+    /*for( int i=0; i<n_threads; i++) { // inicializa a struct de cada thread
+        memset((*t_param[i]).buffer, '\0', sizeof((*t_param[i]).buffer));
+        (*t_param[i]).size = 0;
+    }*/
     int t = 0; // thread 
 
     //GET_TIME(tempo_1);
@@ -110,18 +111,26 @@ int main(int argc, char*argv[]){
     //unsigned char buffer[buffer_size];
     unsigned char prior_digits[palindrome_size+1];
     memset(prior_digits, '\0', sizeof(prior_digits));
-    
+
+    tid = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
+    if(tid==NULL) {
+        fprintf(stderr, "ERRO--malloc\n");
+        return 2;
+    }
+
     for ( int i = 1 ; i < argc ; i++ ){ //passa por todos os arquivos
 
         source = fopen(argv[i], "rb");
-
+    
         if (source)
         {
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
-            t_param[t].size = fread( t_param[t].buffer , 1, buffer_size - palindrome_size + 1, source );
-            strcpy( t_param[t].buffer , prior_digits);
+            t_param = malloc(sizeof(s_param));
+            (*t_param).size = fread( (*t_param).buffer , 1, buffer_size - palindrome_size + 1, source );
+            strcpy( (*t_param).buffer , prior_digits);
+
             //pos = search_prime_palindrome( t_param[t] );
-            if( pthread_create(tid+t , NULL, search_prime_palindrome, &t_param[t]) ){
+            if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param) ){
               fprintf(stderr, "ERRO--pthread_create\n");
               return 3;
             }
@@ -130,7 +139,7 @@ int main(int argc, char*argv[]){
             if( t == n_threads ){
               for(int j=0; j<n_threads; j++) {
                 if(pthread_join(*(tid+j), (void**) &retorno)){
-                  fprintf(stderr, "ERRO--pthread_create\n");
+                  fprintf(stderr, "ERRO--pthread_create1\n");
                   return 3;
                 }
 
@@ -141,11 +150,8 @@ int main(int argc, char*argv[]){
               }
               t=0;
             } 
-
-
-
-            
-            count += t_param[t].size - strlen(prior_digits);
+           
+            count += (*t_param).size - strlen(prior_digits);
             printf(".");
             //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
             memset(prior_digits, '\0', sizeof(prior_digits));
@@ -154,9 +160,10 @@ int main(int argc, char*argv[]){
             while (!feof(source))
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
-                t_param[t].size  = fread( t_param[t].buffer, 1, buffer_size, source );
+                t_param = malloc(sizeof(s_param));
+                (*t_param).size  = fread( (*t_param).buffer, 1, buffer_size, source );
                 //pos = search_prime_palindrome( t_param[t] );
-                if( pthread_create(tid+t , NULL, search_prime_palindrome, &t_param[t]) ){
+                if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param) ){
                   fprintf(stderr, "ERRO--pthread_create\n");
                   return 3;
                 }
@@ -165,7 +172,7 @@ int main(int argc, char*argv[]){
                 if( t == n_threads ){
                   for(int j=0; j<n_threads; j++) {
                     if(pthread_join(*(tid+j), (void**) &retorno)){
-                      fprintf(stderr, "ERRO--pthread_create\n");
+                      fprintf(stderr, "ERRO--pthread_join");
                       return 3;
                     }
 
@@ -176,9 +183,9 @@ int main(int argc, char*argv[]){
                   }
                   t=0;
                 }
-               
+                
 
-                count += t_param[t].size  - palindrome_size + 1;
+                count += (*t_param).size  - palindrome_size + 1;
                 //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
                 //sleep(1);
                 printf(".");
