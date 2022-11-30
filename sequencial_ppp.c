@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#define BUFFER_SIZE 1000000
+
 /*
 #ifndef _CLOCK_TIMER_H
 #define _CLOCK_TIMER_H
@@ -20,7 +22,7 @@
 #endif
 */
 
-int BUFFER_SIZE = 15;
+int buffer_size = BUFFER_SIZE;
 int palindrome_size = 5;
 
 int is_odd_palindrome( char digits[] ){
@@ -78,8 +80,8 @@ int main(int argc, char*argv[]){
     //double tempo_1, tempo_2; //variáveis para medida de tempo
 
     //GET_TIME(tempo_1);
-    if (argc < 2){
-      fprintf(stderr, "Digite: %s <arquivos entrada em ordem>\n", argv[0]);
+    if (argc < 3){
+      fprintf(stderr, "Digite: %s <tamanho do palindromo> <arquivos entrada em ordem>\n", argv[0]);
       return 1;
     }
 
@@ -87,15 +89,17 @@ int main(int argc, char*argv[]){
     memset(buffer, '\0', sizeof(buffer));
     unsigned char prior_digits[palindrome_size+1];
     memset(prior_digits, '\0', sizeof(prior_digits));
+
+    palindrome_size = atoi(argv[1]);
     
-    for ( int i = 1 ; i < argc ; i++ ){
+    for ( int i = 2 ; i < argc ; i++ ){
 
         source = fopen(argv[i], "rb");
 
         if (source)
         {
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
-            n = fread( buffer, 1, BUFFER_SIZE - palindrome_size + 1, source );
+            n = fread( buffer, 1, buffer_size - palindrome_size + 1, source );
             strcpy( buffer , prior_digits);
             pos = search_prime_palindrome( buffer, n );
             if ( pos ){
@@ -109,7 +113,7 @@ int main(int argc, char*argv[]){
             while (!feof(source))
             {
                 fseek( source, (palindrome_size - 1) * (-1), SEEK_CUR ); 
-                n = fread( buffer, 1, BUFFER_SIZE, source );
+                n = fread( buffer, 1, buffer_size, source );
                 pos = search_prime_palindrome( buffer, n );
                 if ( pos ){
                     printf("Posicao: %llu\n", count + pos - 1 - palindrome_size + 1);
