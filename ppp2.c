@@ -6,7 +6,7 @@
 #include <time.h>
 #include <pthread.h>
 
-#define NTHREADS 5
+#define NTHREADS 4
 #define BUFFER_SIZE 1000000
 
 /*
@@ -25,11 +25,16 @@
 */
 
 int buffer_size = BUFFER_SIZE;
-int palindrome_size = 19;
+int palindrome_size = 5;
 int n_threads = NTHREADS;
 
 unsigned char buffer[BUFFER_SIZE];
 unsigned int dim;
+
+typedef struct pp{
+    int position;
+    char palindrome;
+}pp;
 
 int is_odd_palindrome( char digits[] ){
     int left_check = 0;
@@ -68,8 +73,11 @@ void * search_prime_palindrome( void * arg ){
         strncpy( digits, buffer+i, palindrome_size );
         if ( is_odd_palindrome(digits) ){
             if ( is_prime(digits) ){
-                printf("\nEncontrado: %s\n", digits);
-                pthread_exit((void *) i+1); 
+                //printf("\nEncontrado: %s\n", digits);
+                pp results;
+                results.position = i + 1;
+                results.palindrome = digits;
+                pthread_exit((void *) &results); 
             }
         }
     }
@@ -92,9 +100,9 @@ int main(int argc, char*argv[]){
       fprintf(stderr, "Digite: %s <arquivos entrada em ordem>\n", argv[0]);
       return 1;
     }
-
-
-
+  
+    int min=0;
+    char r;
 
     //unsigned char buffer[BUFFER_SIZE];
     memset(buffer, '\0', sizeof(buffer));
@@ -131,14 +139,21 @@ int main(int argc, char*argv[]){
                     }
                 }
                 for(int j=0; j < n_threads; j++) {
-                    if(pthread_join(threads[j], (void**) &retorno)){
+                    if(pthread_join(threads[j], (void**) &results)){
                         fprintf(stderr, "ERRO--pthread_join");
                         return 3;
                     }
-                    if ( retorno ){
-                        printf("Posicao: %llu\n", count + retorno - 1 - palindrome_size + 1);
-                        goto end_program;
+                    if( min==0)
+                        min = results.position;
+                    if( results != 0 & results < min){
+                        min = results.position;
+                        r = results.palindrome;
                     }
+                }
+                if ( min ){
+                    printf("Palindromo: %s\n", r);
+                    printf("Posicao: %llu\n", count + min - 1 - palindrome_size + 1);
+                    goto end_program;
                 }
                      
                 count += dim - palindrome_size + 1;
