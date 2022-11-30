@@ -92,6 +92,7 @@ int main(int argc, char*argv[]){
     int pos; //posição do palindromo achado no buffer
     int retorno;
     pthread_t threads[NTHREADS];
+    pp results;
 
     //double tempo_1, tempo_2; //variáveis para medida de tempo
 
@@ -145,7 +146,7 @@ int main(int argc, char*argv[]){
                     }
                     if( min==0)
                         min = results.position;
-                    if( results != 0 & results < min){
+                    if( results.position != 0 & results.position < min){
                         min = results.position;
                         r = results.palindrome;
                     }
