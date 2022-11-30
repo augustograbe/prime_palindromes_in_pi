@@ -16,6 +16,14 @@ $ gcc ppp.c -o ppp -lpthread
 $ ./ppp <N_SIZE> FILE_1.txt FILE_2.txt ... FILE_N.txt
 ```
 
+## Test setup
+Intel core i5 8th Gen ( 4 core/ 8 logical processors )
+20 GB ram 2400 Mhz
+HD 5400rpm 
+Windows 10
+
+---
+
 ## explain the code?
 
 - **#define BUFFER_SIZE 1000000**
