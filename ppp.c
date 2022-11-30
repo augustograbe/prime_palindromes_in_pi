@@ -6,7 +6,7 @@
 #include <time.h>
 #include <pthread.h>
 
-#define NTHREADS 4
+#define NTHREADS 5
 #define BUFFER_SIZE 100000
 
 /*
@@ -91,7 +91,8 @@ int main(int argc, char*argv[]){
     unsigned long long count = 0; //quantidade de elementos lidos
     //int pos; //posição do palindromo achado no buffer
     int retorno;
-    pthread_t *tid; //identificadores das threads no sistema
+    //pthread_t *tid; //identificadores das threads no sistema
+    pthread_t threads[NTHREADS];
 
     //double tempo_1, tempo_2; //variáveis para medida de tempo
 
@@ -113,11 +114,11 @@ int main(int argc, char*argv[]){
     unsigned char prior_digits[palindrome_size+1];
     memset(prior_digits, '\0', sizeof(prior_digits));
 
-    tid = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
+    /*tid = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
     if(tid==NULL) {
         fprintf(stderr, "ERRO--malloc tid\n");
         return 2;
-    }
+    }*/
 
     for ( int i = 1 ; i < argc ; i++ ){ //passa por todos os arquivos
 
@@ -126,7 +127,8 @@ int main(int argc, char*argv[]){
         if (source)
         {
             //I primeiro loop inserindo os digitos salvos do ultimo arquivo
-            t_param = malloc(sizeof(s_param));
+
+            /*t_param = malloc(sizeof(s_param));
             if(t_param==NULL) {
               fprintf(stderr, "ERRO--malloc PARAM\n");
               return 2;
@@ -135,7 +137,7 @@ int main(int argc, char*argv[]){
             strcpy( (*t_param).buffer , prior_digits);
 
             //pos = search_prime_palindrome( t_param[t] );
-            if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param) ){
+            if( pthread_create(&threads[t] , NULL, search_prime_palindrome, (void*) t_param) ){
               fprintf(stderr, "ERRO--pthread_create\n");
               return 3;
             }
@@ -143,12 +145,12 @@ int main(int argc, char*argv[]){
             t++;
             if( t == n_threads ){
               for(int j=0; j<n_threads; j++) {
-                if(pthread_join(*(tid+j), (void**) &retorno)){
+                if(pthread_join(threads[j], (void**) &retorno)){
                   fprintf(stderr, "ERRO--pthread_create1\n");
                   return 3;
                 }
 
-                if ( retorno ){
+                if ( (int)retorno ){
                   printf("Posicao %llu\n", count + retorno - 1);
                   goto end_program;
                 }
@@ -159,7 +161,7 @@ int main(int argc, char*argv[]){
             count += (*t_param).size - strlen(prior_digits);
             printf(".");
             //printf("%d =  %s \n",t_param[t].size, t_param[t].buffer);
-            memset(prior_digits, '\0', sizeof(prior_digits));
+            memset(prior_digits, '\0', sizeof(prior_digits));*/
 
 
             while (!feof(source))
@@ -173,7 +175,7 @@ int main(int argc, char*argv[]){
 
                 (*t_param).size  = fread( (*t_param).buffer, 1, buffer_size, source );
                 //pos = search_prime_palindrome( t_param[t] );
-                if( pthread_create(tid+t , NULL, search_prime_palindrome, (void*) t_param) ){
+                if( pthread_create(&threads[t] , NULL, search_prime_palindrome, (void*) t_param) ){
                   fprintf(stderr, "ERRO--pthread_create\n");
                   return 3;
                 }
@@ -181,7 +183,7 @@ int main(int argc, char*argv[]){
                 t++;
                 if( t == n_threads ){
                   for(int j=0; j<n_threads; j++) {
-                    if(pthread_join(*(tid+j), (void**) &retorno)){
+                    if(pthread_join(threads[j], (void**) &retorno)){
                       fprintf(stderr, "ERRO--pthread_join");
                       return 3;
                     }
@@ -202,8 +204,8 @@ int main(int argc, char*argv[]){
             }
 
             //guarda os ultimos digitos para o buffer do proximo arquivo
-            fseek( source, (palindrome_size - 1) * (-1), SEEK_END );
-            fread( prior_digits, 1, palindrome_size - 1, source );
+            /*fseek( source, (palindrome_size - 1) * (-1), SEEK_END );
+            fread( prior_digits, 1, palindrome_size - 1, source );*/
         }
 
         fclose(source);
